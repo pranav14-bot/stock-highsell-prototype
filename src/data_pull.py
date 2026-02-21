@@ -1,25 +1,46 @@
+# src/data_pull.py
+
+import os
 import yfinance as yf
-import pandas as pd
-
-ticker = "AAPL"
-
-df = yf.download(ticker, start="2012-01-01", auto_adjust=False)
-
-# Keep only these columns
-df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
-
-# Make Date a real column (not index) so CSV is simple
-df = df.reset_index()
-
-# Force simple column names (no multi-header)
-df.columns = ["Date", "Open", "High", "Low", "Close", "Volume"]
-
-# Save clean CSV
-out_path = "data/aapl_data.csv"
-df.to_csv(out_path, index=False)
-
-print(f"Saved clean CSV to {out_path}")
-print(df.head())
+from tickers import get_default_tickers
 
 
+def pull_data(ticker: str):
+    print(f"\nPulling {ticker}...")
 
+    df = yf.download(ticker, period="max", interval="1d")
+
+    if df.empty:
+        print(f"No data for {ticker}")
+        return
+
+    # it forces the Date index into a real "Date" column
+    df = df.reset_index()
+
+    # (optional) clean column names
+    df.columns = [str(c).strip() for c in df.columns]
+
+    # save to project-root /data no matter where we run from
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+
+    out_path = os.path.join(data_dir, f"{ticker}_daily.csv")
+
+    df.to_csv(out_path, index=False)
+
+    print(f"Saved {ticker}: {len(df)} rows -> {out_path}")
+
+
+def main():
+    tickers = get_default_tickers()
+
+    print("Available tickers:")
+    print(", ".join(tickers))
+
+    for t in tickers:
+        pull_data(t)
+
+
+if __name__ == "__main__":
+    main()

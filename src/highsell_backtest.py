@@ -3,8 +3,7 @@ import numpy as np
 np.random.seed(42)
 
 TICKER = "AAPL"
-CSV_PATH = "data/aapl_data.csv"
-
+CSV_PATH = "../data/AAPL_daily.csv"
 BUY_EDGE = 0.0375
 STOP_LOSS = 0.03
 TAKE_PROFIT = 0.04
@@ -74,7 +73,7 @@ def main():
     result = backtest(df)
 
     print(f"TICKER: {TICKER}")
-    print(f"Entries: {result['num_entries']}")
+    print(f"Entries: {result['num_trades']}")
     print(f"Total P&L (per 1 share): {result['pnl']:.2f}")
     print("\nLast actions:")
     for t in result["trades"][-10:]:
